@@ -1,16 +1,21 @@
-import { Button } from "~/components/ui/button"
+import HomeNav from "~/components/home/HomeNav"
+import HeroSection from "~/components/home/HeroSection"
+import PhilosophySection from "~/components/home/PhilosophySection"
+import HowItWorksSection from "~/components/home/HowItWorksSection"
+import FeaturesSection from "~/components/home/FeaturesSection"
+import CTABanner from "~/components/home/CTABanner"
+import HomeFooter from "~/components/home/HomeFooter"
 
 export default function Home() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
+      <HomeNav />
+      <HeroSection />
+      <PhilosophySection />
+      <HowItWorksSection />
+      <FeaturesSection />
+      <CTABanner />
+      <HomeFooter />
     </div>
   )
 }
