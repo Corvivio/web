@@ -17,14 +17,14 @@ export default function FeaturesSection() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <FeatureCard
           badge="Video Log"
-          icon={<Video className="size-3" />}
+          icon={<Video className="size-5" />}
           title="Capture the moment"
           description="Upload your end-of-class video and write what you remember. Corvivio suggests a title and surfaces the key things to focus on — you accept, edit, or ignore."
           detail="AI title suggestion · Personal notes · Structured practice tips"
         />
         <FeatureCard
           badge="Practice Queue"
-          icon={<Zap className="size-3" />}
+          icon={<Zap className="size-5" />}
           title="SM-2 Spaced Repetition"
           description="The same algorithm behind Anki, adapted for video review. Each video gets its own card scheduled individually based on how well you recalled it."
           detail="Per-video scheduling · again / got it / easy rating · Adaptive intervals"

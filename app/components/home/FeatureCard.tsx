@@ -16,11 +16,13 @@ export default function FeatureCard({
   detail: string
 }) {
   return (
-    <Card className="rounded-2xl hover:ring-primary/30 transition-all">
-      <CardHeader>
+    <Card className="rounded-2xl pt-0 shadow-warm-sm hover:shadow-warm-md hover:bg-primary/[0.02] transition-all duration-300">
+      {/* Warm gradient top strip */}
+      <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary/70 to-primary/40" aria-hidden="true" />
+      <CardHeader className="pt-5">
         <Badge
           variant="outline"
-          className="w-fit border-primary/30 bg-primary/10 text-primary"
+          className="w-fit border-primary/40 bg-primary/10 text-primary font-medium"
         >
           {icon}
           {badge}

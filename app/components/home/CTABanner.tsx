@@ -6,31 +6,35 @@ export default function CTABanner() {
   return (
     <section className="mx-4 my-16 md:mx-auto md:max-w-4xl">
       <div
-        className="relative overflow-hidden rounded-3xl border border-primary/20"
+        className="relative overflow-hidden rounded-3xl"
         style={{
-          backgroundImage: `
-            radial-gradient(ellipse 70% 80% at 50% 120%,
-              oklch(0.553 0.195 38.402 / 0.25) 0%, transparent 70%),
-            radial-gradient(ellipse 100% 100% at 50% 50%,
-              oklch(1 0 0) 0%, oklch(1 0 0) 100%)
+          background: `
+            radial-gradient(ellipse 80% 80% at 50% 110%,
+              oklch(0.553 0.195 38.402 / 0.50) 0%,
+              transparent 65%),
+            oklch(0.18 0.025 45)
           `,
         }}
       >
         <div className="relative flex flex-col items-center gap-6 px-6 py-20 text-center">
           <Badge
             variant="outline"
-            className="h-auto border-primary/40 bg-primary/10 px-3 py-1 text-primary"
+            className="h-auto px-3 py-1 border-primary/40 bg-primary/20 text-primary font-medium"
           >
             Free while we're in beta
           </Badge>
-          <h2 className="font-heading text-3xl font-bold text-foreground md:text-4xl max-w-lg">
+          <h2 className="font-heading text-3xl font-extrabold text-white md:text-4xl max-w-lg leading-tight">
             Start capturing your practice.
           </h2>
-          <p className="text-muted-foreground max-w-sm">
+          <p className="text-white/70 max-w-sm leading-relaxed">
             No dance vocabulary required. No setup beyond uploading a video.
             Just the loop that helps you actually retain what you learn.
           </p>
-          <Button size="lg" asChild className="px-10 text-base">
+          <Button
+            size="lg"
+            asChild
+            className="px-10 text-base bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-warm-md"
+          >
             <Link to="/signup">Join the Beta →</Link>
           </Button>
         </div>

@@ -5,7 +5,7 @@ export default function HomeNav() {
   return (
     <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <span className="font-heading text-xl font-bold tracking-tight text-foreground">
+        <span className="font-heading text-xl font-extrabold tracking-tight text-primary">
           Corvivio
         </span>
         <Button size="sm" asChild>
