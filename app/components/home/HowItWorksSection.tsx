@@ -5,7 +5,7 @@ import StepCard from "./StepCard"
 export default function HowItWorksSection() {
   return (
     <div className="bg-primary/[0.03] rounded-3xl mx-4 md:mx-auto md:max-w-7xl">
-      <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+      <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         <div className="mb-16 text-center">
           <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl">
             Three steps. No friction.
@@ -35,7 +35,7 @@ export default function HowItWorksSection() {
             number="02"
             icon={<FileText className="size-7" />}
             title="Describe"
-            description="Write a quick note in your own words. No taxonomy, no move names. Sloppy is fine — this is for you."
+            description="Write a quick note in your own words. No taxonomy, no move names. Sloppy is fine, this is for you."
           />
 
           <div className="hidden md:flex flex-1 items-center mt-8 px-6">

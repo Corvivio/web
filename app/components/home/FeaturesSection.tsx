@@ -4,7 +4,7 @@ import FeatureCard from "./FeatureCard"
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+    <section id="features" className="mx-auto max-w-6xl px-4 py-12 md:py-16">
       <div className="mb-12 text-center">
         <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl">
           What's in V0.1

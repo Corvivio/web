@@ -6,7 +6,7 @@ export default function HomeFooter() {
           Corvivio{" "}
           <span className="font-normal text-muted-foreground">© 2026</span>
         </span>
-        <span className="italic text-primary/60">Made for the dance floor.</span>
+        <span className="italic text-primary/60">Your training companion.</span>
       </div>
     </footer>
   )
