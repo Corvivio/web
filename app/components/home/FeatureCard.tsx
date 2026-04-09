@@ -16,7 +16,7 @@ export default function FeatureCard({
   detail: string
 }) {
   return (
-    <Card className="rounded-2xl pt-0 shadow-warm-sm hover:shadow-warm-md hover:bg-primary/[0.02] transition-all duration-300">
+    <Card className="h-full rounded-2xl pt-0 shadow-warm-sm hover:shadow-warm-md hover:bg-primary/[0.02] transition-all duration-300">
       {/* Warm gradient top strip */}
       <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary/70 to-primary/40" aria-hidden="true" />
       <CardHeader className="pt-5">

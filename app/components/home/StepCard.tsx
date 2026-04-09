@@ -22,7 +22,7 @@ export default function StepCard({
       </span>
 
       {/* Icon box — warm amber glow */}
-      <div className="relative flex items-center justify-center size-20 rounded-2xl bg-primary/15 border border-primary/30 text-primary shadow-warm-sm hover:bg-primary/20 transition-colors duration-200">
+      <div className="relative flex items-center justify-center size-20 rounded-2xl bg-primary/15 border border-primary/30 text-primary shadow-warm-sm hover:bg-primary/20 hover:scale-105 hover:shadow-warm-md transition-all duration-200">
         {icon}
       </div>
 

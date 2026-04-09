@@ -1,6 +1,5 @@
 import { Link } from "react-router"
 import { Button } from "~/components/ui/button"
-import { Badge } from "~/components/ui/badge"
 
 export default function HeroSection() {
   return (

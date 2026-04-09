@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import {
   Links,
   Meta,
@@ -30,6 +31,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    console.log(
+      "%c Corvivio",
+      "font-size:18px; font-weight:800; color:#c2610a; font-family:Manrope,sans-serif;",
+      "\n\nBuilt for dancers who want to remember what they learned.\nWe track combos, not metrics.\n\nOpen to working together? → hello@corvivio.app",
+    )
+  }, [])
+
   return (
     <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
       <Outlet />

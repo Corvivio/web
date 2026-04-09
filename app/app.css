@@ -127,6 +127,7 @@
     }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
     }
 }
 
@@ -143,5 +144,49 @@
   }
   .shadow-warm-md {
     box-shadow: 0 4px 24px oklch(0.553 0.195 38.402 / 0.18);
+  }
+
+  /* Lantern breathe — CTABanner ambient glow */
+  @keyframes lantern-breathe {
+    0%, 100% { opacity: 0.50; transform: scaleY(1); }
+    50%       { opacity: 0.65; transform: scaleY(1.06); }
+  }
+  .animate-lantern-breathe {
+    animation: lantern-breathe 4s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+
+  /* Button shimmer — warm light ray on hover */
+  @keyframes shimmer-slide {
+    from { transform: translateX(-100%) skewX(-20deg); }
+    to   { transform: translateX(350%) skewX(-20deg); }
+  }
+  .btn-shimmer {
+    overflow: hidden;
+    position: relative;
+  }
+  .btn-shimmer::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    width: 30%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(1 0 0 / 0.20),
+      transparent
+    );
+    transform: translateX(-100%) skewX(-20deg);
+    pointer-events: none;
+  }
+  .btn-shimmer:hover::after {
+    animation: shimmer-slide 0.55s ease-in-out forwards;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-lantern-breathe,
+    .animate-scroll-bob,
+    .btn-shimmer::after { animation: none !important; }
   }
 }
