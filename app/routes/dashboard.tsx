@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router"
 import { useEffect, useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
-import { Play, Upload } from "lucide-react"
+import { Calendar, Clock, Music2, Play, Upload } from "lucide-react"
 import HomeFooter from "~/components/home/HomeFooter"
 import UploadVideoDialog from "~/components/UploadVideoDialog"
 import { useApi } from "~/lib/api"
@@ -13,6 +13,7 @@ type ApiVideo = {
   title: string
   danceStyle: string | null
   createdAt: string
+  dueDate: string | null
 }
 
 const DANCE_STYLE_LABELS: Record<string, string> = {
@@ -27,6 +28,7 @@ type VideoSession = {
   title: string
   date: string
   danceStyle: string | null
+  dueDate: string | null
   gradientFrom: string
   gradientVia?: string
   gradientTo: string
@@ -59,10 +61,18 @@ function toVideoSession(v: ApiVideo): VideoSession {
       year: "numeric",
     }),
     danceStyle: v.danceStyle,
+    dueDate: v.dueDate,
     gradientFrom: g.from,
     gradientVia: g.via,
     gradientTo: g.to,
   }
+}
+
+function formatDueDate(dueDate: string): string {
+  return new Date(dueDate + "T00:00:00").toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  })
 }
 
 const MAX_VISIBLE = 6
@@ -73,8 +83,7 @@ function VideoCard({ video }: { video: VideoSession }) {
     : `linear-gradient(135deg, ${video.gradientFrom} 0%, ${video.gradientTo} 100%)`
 
   return (
-    <Link
-      to={`/practice/${video.id}`}
+    <div
       className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
       style={{ boxShadow: "0 2px 12px oklch(0.553 0.195 38.402 / 0.10)" }}
       onMouseEnter={(e) => {
@@ -86,58 +95,79 @@ function VideoCard({ video }: { video: VideoSession }) {
           "0 2px 12px oklch(0.553 0.195 38.402 / 0.10)"
       }}
     >
-      {/* Thumbnail */}
-      <div
-        className="relative w-full aspect-video"
-        style={{ background: thumbnailGradient }}
-      >
-        {/* Ambient highlight */}
+      <Link to={`/practice/${video.id}`} className="flex flex-col">
+        {/* Thumbnail */}
         <div
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 70% at 30% 30%, oklch(1 0 0 / 0.06) 0%, transparent 60%)",
-          }}
-        />
-
-        {/* Play overlay on hover */}
-        <div
-          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ background: "oklch(0 0 0 / 0.25)" }}
+          className="relative w-full aspect-video"
+          style={{ background: thumbnailGradient }}
         >
+          {/* Ambient highlight */}
           <div
-            className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ background: "oklch(0.553 0.195 38.402 / 0.90)" }}
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 70% at 30% 30%, oklch(1 0 0 / 0.06) 0%, transparent 60%)",
+            }}
+          />
+
+          {/* Play overlay on hover */}
+          <div
+            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            style={{ background: "oklch(0 0 0 / 0.25)" }}
           >
-            <Play className="size-5 text-white fill-white ml-0.5" />
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center"
+              style={{ background: "oklch(0.553 0.195 38.402 / 0.90)" }}
+            >
+              <Play className="size-5 text-white fill-white ml-0.5" />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Card body */}
-      <div className="flex flex-col gap-1.5 px-4 py-3 bg-card">
-        <p className="font-heading font-semibold text-sm text-foreground leading-snug line-clamp-1">
-          {video.title}
-        </p>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Badge
-            variant="outline"
-            className="border-primary/20 text-muted-foreground text-[10px] h-auto py-0.5 px-2 rounded-md font-normal w-fit"
-          >
-            {video.date}
-          </Badge>
-          {video.danceStyle && (
+        {/* Card body */}
+        <div className="flex flex-col gap-1.5 px-4 pt-3 pb-2 bg-card">
+          <p className="font-heading font-semibold text-sm text-foreground leading-snug line-clamp-1">
+            {video.title}
+          </p>
+          <div className="flex items-center gap-1.5 flex-wrap">
             <Badge
               variant="outline"
-              className="border-primary/20 text-primary/70 text-[10px] h-auto py-0.5 px-2 rounded-md font-normal w-fit"
+              className="border-primary/20 text-muted-foreground text-[10px] h-auto py-0.5 px-2 rounded-md font-normal w-fit gap-1"
             >
-              {DANCE_STYLE_LABELS[video.danceStyle] ?? video.danceStyle}
+              <Calendar className="size-2.5" />
+              {video.date}
             </Badge>
-          )}
+            {video.danceStyle && (
+              <Badge
+                variant="outline"
+                className="border-primary/20 text-primary/70 text-[10px] h-auto py-0.5 px-2 rounded-md font-normal w-fit gap-1"
+              >
+                <Music2 className="size-2.5" />
+                {DANCE_STYLE_LABELS[video.danceStyle] ?? video.danceStyle}
+              </Badge>
+            )}
+            {video.dueDate && (() => {
+              const today = new Date().toISOString().slice(0, 10)
+              const isDue = video.dueDate <= today
+              return (
+                <Badge
+                  variant="outline"
+                  className={
+                    isDue
+                      ? "border-primary/40 text-primary text-[10px] h-auto py-0.5 px-2 rounded-md font-normal w-fit gap-1"
+                      : "border-border text-muted-foreground/60 text-[10px] h-auto py-0.5 px-2 rounded-md font-normal w-fit gap-1"
+                  }
+                >
+                  <Clock className="size-2.5" />
+                  {formatDueDate(video.dueDate)}
+                </Badge>
+              )
+            })()}
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   )
 }
 
@@ -162,6 +192,20 @@ export default function DashboardPage() {
   const [videos, setVideos] = useState<ApiVideo[]>([])
   const [videosLoading, setVideosLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
+  const [practiceLoading, setPracticeLoading] = useState(false)
+
+  async function handleStartPractice() {
+    if (practiceLoading) return
+    setPracticeLoading(true)
+    const res = await api.get<{ videos: Array<{ videoId: string }> }>("/training")
+    setPracticeLoading(false)
+    if ("error" in res || !res.data?.videos.length) return
+    const [first, ...rest] = res.data.videos
+    const params = new URLSearchParams()
+    if (rest.length > 0) params.set("queue", rest.map((v) => v.videoId).join(","))
+    params.set("total", String(res.data.videos.length))
+    navigate(`/practice/${first.videoId}?${params.toString()}`)
+  }
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -186,9 +230,12 @@ export default function DashboardPage() {
   }
 
   const firstName = user.firstName ?? user.username ?? "dancer"
+  const today = new Date().toISOString().slice(0, 10)
   const sessions = videos.map(toVideoSession)
   const visibleSessions = showAll ? sessions : sessions.slice(0, MAX_VISIBLE)
   const hasMore = sessions.length > MAX_VISIBLE
+  const dueCount = videos.filter((v) => v.dueDate != null && v.dueDate <= today).length
+  const hasDue = dueCount > 0
 
   return (
     <div className="min-h-screen bg-background">
@@ -243,12 +290,17 @@ export default function DashboardPage() {
         {/* Action row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Start Practice */}
-          <Link
-            to="/dashboard"
-            className="group relative overflow-hidden rounded-2xl flex flex-col justify-between gap-6 p-6 transition-all duration-300 hover:-translate-y-0.5"
-            style={{
+          <button
+            type="button"
+            onClick={handleStartPractice}
+            disabled={practiceLoading || videosLoading}
+            className="group relative overflow-hidden rounded-2xl flex flex-col justify-between gap-6 p-6 transition-all duration-300 hover:-translate-y-0.5 text-left cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+            style={hasDue ? {
               background: "oklch(0.553 0.195 38.402)",
               boxShadow: "0 4px 24px oklch(0.553 0.195 38.402 / 0.30)",
+            } : {
+              background: "oklch(0.28 0.025 45)",
+              boxShadow: "0 4px 24px oklch(0.28 0.025 45 / 0.30)",
             }}
           >
             {/* Shimmer on hover */}
@@ -265,16 +317,18 @@ export default function DashboardPage() {
                 <Play className="size-6 text-white fill-white ml-0.5" />
               </div>
               <Badge className="bg-white/15 text-white border border-white/20 text-xs h-auto py-0.5 px-2 backdrop-blur-sm">
-                Ready
+                {practiceLoading ? "Loading…" : hasDue ? `${dueCount} due` : "All caught up"}
               </Badge>
             </div>
             <div className="relative z-10">
               <p className="font-heading font-extrabold text-2xl text-white leading-tight">
                 Start Practice
               </p>
-              <p className="text-white/65 text-sm mt-1">Resume where you left off</p>
+              <p className="text-white/65 text-sm mt-1">
+                {hasDue ? "Videos ready for review" : "No videos due right now"}
+              </p>
             </div>
-          </Link>
+          </button>
 
           {/* Upload Video */}
           <button

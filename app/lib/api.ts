@@ -28,6 +28,10 @@ export function useApi() {
       return { error: res.statusText || `HTTP ${res.status}` }
     }
 
+    if (res.status === 204 || res.headers.get("content-length") === "0") {
+      return { data: undefined as T }
+    }
+
     const data = (await res.json()) as T
     return { data }
   }

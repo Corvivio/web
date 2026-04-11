@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router"
-import { ArrowLeft, CheckCircle2 } from "lucide-react"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router"
+import { ArrowLeft, ArrowRight, Calendar, CheckCircle2, Clock, Music2, Trash2 } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
 import { Card, CardContent } from "~/components/ui/card"
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog"
@@ -91,6 +92,14 @@ export default function PracticePage() {
   const { videoId } = useParams<{ videoId: string }>()
   const api = useApi()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const queueParam = searchParams.get("queue") ?? ""
+  const queue = queueParam ? queueParam.split(",").filter(Boolean) : []
+  const total = Number(searchParams.get("total") ?? queue.length + 1)
+  const current = total - queue.length
+  const isInQueue = total > 1
+  const isLastVideo = queue.length === 0
 
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -100,12 +109,43 @@ export default function PracticePage() {
   const [rated, setRated] = useState(false)
   const [isPortrait, setIsPortrait] = useState<boolean | null>(null)
   const [ratingOpen, setRatingOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  function navigateToNext() {
+    const [nextId, ...remaining] = queue
+    if (!nextId) { navigate("/dashboard"); return }
+    const params = new URLSearchParams()
+    if (remaining.length > 0) params.set("queue", remaining.join(","))
+    params.set("total", String(total))
+    navigate(`/practice/${nextId}?${params.toString()}`)
+  }
+
+  async function handleDelete() {
+    setDeleting(true)
+    const result = await api.del(`/videos/${videoId}`)
+    if (result.error) {
+      setDeleting(false)
+      return
+    }
+    setDeleteOpen(false)
+    navigate("/dashboard")
+  }
 
   useEffect(() => {
     if (!videoId) {
       navigate("/dashboard")
       return
     }
+
+    setLoading(true)
+    setLoadError(null)
+    setVideoData(null)
+    setDownloadUrl(null)
+    setRated(false)
+    setRatingOpen(false)
+    setIsPortrait(null)
+    setSubmitting(false)
 
     Promise.all([
       api.get<VideoDetail>(`/videos/${videoId}`),
@@ -180,11 +220,39 @@ export default function PracticePage() {
           </Link>
         </Button>
 
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setDeleteOpen(true)}
+          className="gap-1.5 text-muted-foreground/60 hover:text-destructive"
+        >
+          <Trash2 className="size-3.5" />
+          Delete
+        </Button>
+
+        {isInQueue && (
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {current} of {total}
+          </span>
+        )}
+
         <div className="ml-auto">
           {rated ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CheckCircle2 className="size-4 text-primary" />
-              Session logged
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <CheckCircle2 className="size-4 text-primary" />
+                Session logged
+              </div>
+              {isLastVideo ? (
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/dashboard">All done!</Link>
+                </Button>
+              ) : (
+                <Button size="sm" onClick={navigateToNext}>
+                  Next
+                  <ArrowRight className="ml-1.5 size-4" />
+                </Button>
+              )}
             </div>
           ) : (
             <Button size="sm" onClick={() => setRatingOpen(true)}>
@@ -276,6 +344,28 @@ export default function PracticePage() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete confirmation */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-xl font-extrabold">
+              Delete video?
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            This will permanently delete the video and all its practice tips and review history.
+          </p>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting…" : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <main className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-10">
         {/* Title + meta */}
         <section className="flex flex-col gap-2">
@@ -285,19 +375,39 @@ export default function PracticePage() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               variant="outline"
-              className="h-auto rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-muted-foreground"
+              className="h-auto rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-muted-foreground gap-1"
             >
+              <Calendar className="size-3" />
               {formattedDate}
             </Badge>
             {videoData.danceStyle && (
               <Badge
                 variant="outline"
-                className="h-auto rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-primary/70"
+                className="h-auto rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-primary/70 gap-1"
               >
+                <Music2 className="size-3" />
                 {DANCE_STYLE_LABELS[videoData.danceStyle] ??
                   videoData.danceStyle}
               </Badge>
             )}
+            {videoData.card && (() => {
+              const today = new Date().toISOString().slice(0, 10)
+              const isDue = videoData.card!.dueDate <= today
+              const formatted = new Date(videoData.card!.dueDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
+              return (
+                <Badge
+                  variant="outline"
+                  className={
+                    isDue
+                      ? "h-auto rounded-md border-primary/40 px-2 py-0.5 text-xs font-normal text-primary gap-1"
+                      : "h-auto rounded-md border-border px-2 py-0.5 text-xs font-normal text-muted-foreground/60 gap-1"
+                  }
+                >
+                  <Clock className="size-3" />
+                  {formatted}
+                </Badge>
+              )
+            })()}
           </div>
         </section>
 
