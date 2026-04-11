@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { UploadCloud, Clapperboard, AlertCircle, CheckCircle2, ArrowLeft, Sparkles, Loader2, X, Plus } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import {
@@ -8,6 +8,14 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog"
 import { useApi } from "~/lib/api"
+import {
+  VideoPlayer,
+  VideoPlayerContent,
+  VideoPlayerControlBar,
+  VideoPlayerFullscreenButton,
+  VideoPlayerPlayButton,
+  VideoPlayerTimeRange,
+} from "../../components/kibo-ui/video-player"
 
 type DanceStyle = "salsa_on1" | "salsa_on2" | "bachata" | "bachata_sensual"
 
@@ -47,8 +55,16 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
   const [saving, setSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
   const [dragging, setDragging] = useState(false)
+  const [localVideoUrl, setLocalVideoUrl] = useState<string | null>(null)
 
-  const canAnalyze = file !== null && rawNotes.trim().length > 0 && !analyzing
+  useEffect(() => {
+    if (!file) { setLocalVideoUrl(null); return }
+    const url = URL.createObjectURL(file)
+    setLocalVideoUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
+
+  const canAnalyze = file !== null && !analyzing
   const canSave = title.trim().length > 0 && r2Key !== null && !saving && !r2Uploading
 
   function reset() {
@@ -103,16 +119,11 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
     setAnalyzing(true)
     setErrorMsg("")
 
-    // Fire AI and R2 upload in parallel — independent chains
-    const aiPromise = api
-      .post<{ suggestedTitle: string; practiceTips: string[] }>("/videos/process-notes", {
-        rawNotes: rawNotes.trim(),
-        ...(danceStyle ? { danceStyle } : {}),
-      })
-      .then((result) => {
-        if (result.error) throw new Error(result.error)
-        return result.data!
-      })
+    const dateTitle = new Date().toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })
 
     const r2Promise = api
       .post<{ uploadUrl: string; key: string }>("/videos/upload-url", {
@@ -131,16 +142,8 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
         return key
       })
 
-    // Transition to review as soon as AI finishes; R2 continues independently
-    try {
-      const aiResult = await aiPromise
-      setTitle(aiResult.suggestedTitle)
-      setPracticeTips(aiResult.practiceTips)
-      setStep("review")
-      setAnalyzing(false)
+    const resolveR2 = () => {
       setR2Uploading(true)
-
-      // R2 resolves later
       r2Promise
         .then((key) => {
           setR2Key(key)
@@ -150,6 +153,37 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
           setR2Uploading(false)
           setErrorMsg(err instanceof Error ? err.message : "Video upload failed. Please try again.")
         })
+    }
+
+    // No notes — skip AI, use date title
+    if (!rawNotes.trim()) {
+      setTitle(dateTitle)
+      setPracticeTips([])
+      setStep("review")
+      setAnalyzing(false)
+      resolveR2()
+      return
+    }
+
+    // Fire AI in parallel with R2 upload
+    const aiPromise = api
+      .post<{ suggestedTitle: string; practiceTips: string[] }>("/videos/process-notes", {
+        rawNotes: rawNotes.trim(),
+        ...(danceStyle ? { danceStyle } : {}),
+      })
+      .then((result) => {
+        if (result.error) throw new Error(result.error)
+        return result.data!
+      })
+
+    // Transition to review as soon as AI finishes; R2 continues independently
+    try {
+      const aiResult = await aiPromise
+      setTitle(aiResult.suggestedTitle || dateTitle)
+      setPracticeTips(aiResult.practiceTips)
+      setStep("review")
+      setAnalyzing(false)
+      resolveR2()
     } catch (err) {
       setAnalyzing(false)
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.")
@@ -197,7 +231,7 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg rounded-2xl">
+      <DialogContent className={`rounded-2xl transition-all ${file ? "sm:max-w-4xl" : "sm:max-w-lg"}`}>
         <DialogHeader>
           <DialogTitle className="font-heading font-extrabold text-xl text-foreground">
             {step === "input" ? "Upload a Class Video" : "Review Video"}
@@ -206,8 +240,46 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
 
         {step === "input" ? (
           <form onSubmit={handleAnalyze} className="flex flex-col gap-5 mt-1">
-            {/* Drop zone */}
-            <div
+            <div className="flex flex-col sm:flex-row gap-6">
+              {/* Video preview — shown once a file is selected */}
+              {localVideoUrl && (
+                <div className="sm:w-[58%] shrink-0 flex flex-col gap-2">
+                  <VideoPlayer className="w-full rounded-xl overflow-hidden">
+                    <VideoPlayerContent
+                      slot="media"
+                      src={localVideoUrl}
+                      preload="metadata"
+                      className="w-full aspect-video object-contain"
+                    />
+                    <VideoPlayerControlBar>
+                      <VideoPlayerPlayButton />
+                      <VideoPlayerTimeRange />
+                      <VideoPlayerFullscreenButton />
+                    </VideoPlayerControlBar>
+                  </VideoPlayer>
+                  <button
+                    type="button"
+                    disabled={analyzing}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors self-center"
+                  >
+                    Change video
+                  </button>
+                </div>
+              )}
+
+              {/* Drop zone + notes + style */}
+              <div className="flex flex-col gap-5 flex-1 min-w-0">
+            {/* Drop zone — hidden once a file is selected */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="video/mp4,video/quicktime,video/webm"
+              className="hidden"
+              disabled={analyzing}
+              onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+            />
+            {!file && <div
               onClick={() => !analyzing && fileInputRef.current?.click()}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -216,55 +288,30 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
               style={{
                 borderColor: dragging
                   ? "oklch(0.553 0.195 38.402 / 0.70)"
-                  : file
-                    ? "oklch(0.553 0.195 38.402 / 0.55)"
-                    : "oklch(0.553 0.195 38.402 / 0.35)",
+                  : "oklch(0.553 0.195 38.402 / 0.35)",
                 background: dragging
                   ? "oklch(0.553 0.195 38.402 / 0.04)"
-                  : file
-                    ? "oklch(0.553 0.195 38.402 / 0.025)"
-                    : undefined,
+                  : undefined,
               }}
             >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="video/mp4,video/quicktime,video/webm"
-                className="hidden"
-                disabled={analyzing}
-                onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
-              />
               <div
                 className="w-12 h-12 rounded-2xl flex items-center justify-center"
                 style={{ background: "oklch(0.553 0.195 38.402 / 0.10)" }}
               >
-                {file ? (
-                  <CheckCircle2 className="size-6 text-primary" />
-                ) : (
-                  <UploadCloud className="size-6 text-primary" />
-                )}
+                <UploadCloud className="size-6 text-primary" />
               </div>
-              {file ? (
-                <div>
-                  <p className="text-sm font-medium text-foreground">{file.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {(file.size / 1024 / 1024).toFixed(1)} MB · click to change
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-sm font-medium text-foreground">Drop your video here</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    MP4, MOV or WebM · up to 2 GB
-                  </p>
-                </div>
-              )}
-            </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Drop your video here</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  MP4, MOV or WebM · up to 2 GB
+                </p>
+              </div>
+            </div>}
 
             {/* Raw Notes */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-foreground/70 uppercase tracking-wide">
-                Class Notes <span className="text-primary">*</span>
+                Class Notes
               </label>
               <textarea
                 placeholder="Paste or type your raw notes from class…"
@@ -295,6 +342,9 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
                 ))}
               </select>
             </div>
+
+              </div>{/* end inner flex-1 column */}
+            </div>{/* end two-column row */}
 
             {/* Error banner */}
             {errorMsg && (

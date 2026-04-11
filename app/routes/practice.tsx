@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams, useSearchParams } from "react-router"
-import { ArrowLeft, ArrowRight, Calendar, CheckCircle2, Clock, Music2, Trash2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock, Music2, Pencil, Plus, Trash2, Upload, X } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
 import { Card, CardContent } from "~/components/ui/card"
@@ -111,6 +111,9 @@ export default function PracticePage() {
   const [ratingOpen, setRatingOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [editingTips, setEditingTips] = useState(false)
+  const [draftTips, setDraftTips] = useState<string[]>([])
+  const [savingTips, setSavingTips] = useState(false)
 
   function navigateToNext() {
     const [nextId, ...remaining] = queue
@@ -177,6 +180,30 @@ export default function PracticePage() {
     }
   }
 
+  function startEditTips() {
+    setDraftTips(videoData!.practiceTips.map((t) => t.body))
+    setEditingTips(true)
+  }
+
+  function cancelEditTips() {
+    setEditingTips(false)
+    setDraftTips([])
+  }
+
+  async function saveEditedTips() {
+    setSavingTips(true)
+    const filtered = draftTips.filter((t) => t.trim().length > 0)
+    const res = await api.put<PracticeTip[]>(`/videos/${videoId}/tips`, {
+      tips: filtered.map((body) => ({ body })),
+    })
+    setSavingTips(false)
+    if ("data" in res && res.data) {
+      setVideoData((v) => v ? { ...v, practiceTips: res.data! } : v)
+      setEditingTips(false)
+      setDraftTips([])
+    }
+  }
+
   if (loading) return <PageSkeleton />
 
   if (loadError || !videoData) {
@@ -207,27 +234,17 @@ export default function PracticePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="flex items-center gap-4 border-b border-border/50 px-6 py-4">
+      <header className="flex items-center gap-2 border-b border-border/50 px-3 py-3 sm:gap-4 sm:px-6 sm:py-4">
         <Button
           variant="ghost"
           size="sm"
           asChild
-          className="gap-2 text-muted-foreground hover:text-foreground"
+          className="shrink-0 gap-2 text-muted-foreground hover:text-foreground"
         >
           <Link to="/dashboard">
             <ArrowLeft className="size-4" />
-            Back to dashboard
+            <span className="hidden sm:inline">Back to dashboard</span>
           </Link>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setDeleteOpen(true)}
-          className="gap-1.5 text-muted-foreground/60 hover:text-destructive"
-        >
-          <Trash2 className="size-3.5" />
-          Delete
         </Button>
 
         {isInQueue && (
@@ -236,13 +253,14 @@ export default function PracticePage() {
           </span>
         )}
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           {rated ? (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <div className="hidden items-center gap-1.5 text-sm text-muted-foreground sm:flex">
                 <CheckCircle2 className="size-4 text-primary" />
                 Session logged
               </div>
+              <CheckCircle2 className="size-4 text-primary sm:hidden" />
               {isLastVideo ? (
                 <Button size="sm" variant="outline" asChild>
                   <Link to="/dashboard">All done!</Link>
@@ -256,9 +274,18 @@ export default function PracticePage() {
             </div>
           ) : (
             <Button size="sm" onClick={() => setRatingOpen(true)}>
-              End Session
+              Review Video
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeleteOpen(true)}
+            className="shrink-0 gap-1.5 text-muted-foreground/60 hover:text-destructive"
+          >
+            <Trash2 className="size-3.5" />
+            <span className="hidden sm:inline">Delete</span>
+          </Button>
         </div>
       </header>
 
@@ -377,7 +404,7 @@ export default function PracticePage() {
               variant="outline"
               className="h-auto rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-muted-foreground gap-1"
             >
-              <Calendar className="size-3" />
+              <Upload className="size-3" />
               {formattedDate}
             </Badge>
             {videoData.danceStyle && (
@@ -466,7 +493,7 @@ export default function PracticePage() {
             <h2 className="font-heading text-xl font-extrabold text-foreground">
               Practice Tips
             </h2>
-            {videoData.practiceTips.length > 0 && (
+            {!editingTips && videoData.practiceTips.length > 0 && (
               <Badge
                 variant="outline"
                 className="ml-1 border-primary/30 text-primary"
@@ -474,9 +501,93 @@ export default function PracticePage() {
                 {videoData.practiceTips.length}
               </Badge>
             )}
+            {editingTips && draftTips.filter((t) => t.trim().length > 0).length > 0 && (
+              <Badge
+                variant="outline"
+                className="ml-1 border-primary/30 text-primary"
+              >
+                {draftTips.filter((t) => t.trim().length > 0).length}
+              </Badge>
+            )}
+            <div className="ml-auto flex items-center gap-2">
+              {editingTips ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={cancelEditTips}
+                    disabled={savingTips}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={saveEditedTips}
+                    disabled={savingTips}
+                  >
+                    {savingTips ? "Saving…" : "Save"}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={startEditTips}
+                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <Pencil className="size-3.5" />
+                  Edit
+                </Button>
+              )}
+            </div>
           </div>
 
-          {videoData.practiceTips.length === 0 ? (
+          {editingTips ? (
+            <div className="flex flex-col gap-3">
+              {draftTips.map((tip, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <textarea
+                    value={tip}
+                    onChange={(e) => {
+                      const next = [...draftTips]
+                      next[i] = e.target.value
+                      setDraftTips(next)
+                      e.target.style.height = "auto"
+                      e.target.style.height = `${e.target.scrollHeight}px`
+                    }}
+                    ref={(el) => {
+                      if (el) {
+                        el.style.height = "auto"
+                        el.style.height = `${el.scrollHeight}px`
+                      }
+                    }}
+                    disabled={savingTips}
+                    className="flex-1 resize-none overflow-hidden rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                    rows={1}
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setDraftTips(draftTips.filter((_, j) => j !== i))}
+                    disabled={savingTips}
+                    className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="size-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setDraftTips([...draftTips, ""])}
+                disabled={savingTips}
+                className="mt-1 w-fit gap-1.5"
+              >
+                <Plus className="size-3.5" />
+                Add tip
+              </Button>
+            </div>
+          ) : videoData.practiceTips.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No tips yet for this session.
             </p>
