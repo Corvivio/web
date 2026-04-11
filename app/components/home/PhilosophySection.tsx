@@ -35,7 +35,7 @@ const philosophyCards = [
   {
     icon: <Brain className="size-7 text-primary" />,
     title: "Built for how dancers learn",
-    body: "Spaced repetition surfaces each pattern right before it fades — so drilling feels effortless, not like catching up.",
+    body: "Spaced repetition surfaces each pattern right before it fades: so drilling feels effortless, not like catching up.",
   },
 ]
 
