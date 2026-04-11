@@ -1,7 +1,10 @@
 import { Link } from "react-router"
+import { useUser } from "@clerk/react-router"
 import { Button } from "~/components/ui/button"
 
 export default function HomeNav() {
+  const { isSignedIn } = useUser()
+
   return (
     <nav aria-label="Main navigation" className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -12,7 +15,11 @@ export default function HomeNav() {
           Corvivio
         </Link>
         <Button size="sm" asChild>
-          <Link to="/signup">Join the Beta</Link>
+          {isSignedIn ? (
+            <Link to="/dashboard">Dashboard</Link>
+          ) : (
+            <Link to="/signup">Join the Beta</Link>
+          )}
         </Button>
       </div>
     </nav>

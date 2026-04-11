@@ -7,7 +7,7 @@ export default function SignUpPage() {
         routing="path"
         path="/signup"
         signInUrl="/signin"
-        fallbackRedirectUrl="/"
+        forceRedirectUrl="/dashboard"
         appearance={{ variables: { colorPrimary: "oklch(0.553 0.195 38.402)" } }}
       />
     </div>
