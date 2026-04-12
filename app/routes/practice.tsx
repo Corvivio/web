@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router"
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock, Music2, Pencil, Plus, Trash2, Upload, X } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
-import { Card, CardContent } from "~/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -596,20 +595,22 @@ export default function PracticePage() {
               {videoData.practiceTips.map((tip, i) => {
                 const accent = TIP_ACCENTS[i % TIP_ACCENTS.length]
                 return (
-                  <Card
+                  <div
                     key={tip.id}
-                    className="overflow-hidden rounded-2xl pt-0"
+                    className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5"
+                    style={{ boxShadow: "0 2px 16px oklch(0 0 0 / 0.07)" }}
                   >
                     <div
-                      className={`h-1 w-full bg-gradient-to-r ${accent}`}
+                      className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accent}`}
                       aria-hidden="true"
                     />
-                    <CardContent className="pt-5">
-                      <p className="text-xs leading-relaxed text-muted-foreground">
-                        {tip.body}
-                      </p>
-                    </CardContent>
-                  </Card>
+                    <span className="mb-3 block font-heading text-[10px] font-bold tracking-widest text-muted-foreground/40 uppercase">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <p className="text-sm leading-relaxed text-foreground">
+                      {tip.body}
+                    </p>
+                  </div>
                 )
               })}
             </div>

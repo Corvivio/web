@@ -6,7 +6,7 @@ export default function HomeFooter() {
           Corvivio{" "}
           <span className="font-normal text-muted-foreground">© 2026</span>
         </span>
-        <span className="text-primary/60 italic">
+        <span className="text-sm text-primary/60 italic">
           Never forget a combo again.
         </span>
       </div>
