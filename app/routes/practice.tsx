@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams, useSearchParams } from "react-router"
-import { ArrowLeft, ArrowRight, CheckCircle2, Clock, Music2, Pencil, Plus, Trash2, Upload, X } from "lucide-react"
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  Music2,
+  Pencil,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
 import {
@@ -50,7 +61,6 @@ type VideoDetail = {
   card: Card | null
 }
 
-
 const DANCE_STYLE_LABELS: Record<string, string> = {
   salsa_on1: "Salsa On1",
   salsa_on2: "Salsa On2",
@@ -64,7 +74,6 @@ const TIP_ACCENTS = [
   "from-secondary/40 via-secondary/70 to-secondary/40",
   "from-primary/30 via-secondary/50 to-primary/30",
 ]
-
 
 function PageSkeleton() {
   return (
@@ -117,7 +126,10 @@ export default function PracticePage() {
 
   function navigateToNext() {
     const [nextId, ...remaining] = queue
-    if (!nextId) { navigate("/dashboard"); return }
+    if (!nextId) {
+      navigate("/dashboard")
+      return
+    }
     const params = new URLSearchParams()
     if (remaining.length > 0) params.set("queue", remaining.join(","))
     params.set("total", String(total))
@@ -198,7 +210,7 @@ export default function PracticePage() {
     })
     setSavingTips(false)
     if ("data" in res && res.data) {
-      setVideoData((v) => v ? { ...v, practiceTips: res.data! } : v)
+      setVideoData((v) => (v ? { ...v, practiceTips: res.data! } : v))
       setEditingTips(false)
       setDraftTips([])
     }
@@ -248,7 +260,7 @@ export default function PracticePage() {
         </Button>
 
         {isInQueue && (
-          <span className="text-sm tabular-nums text-muted-foreground">
+          <span className="text-sm text-muted-foreground tabular-nums">
             {current} of {total}
           </span>
         )}
@@ -361,7 +373,8 @@ export default function PracticePage() {
               </>
             ) : (
               <p className="text-sm text-muted-foreground">
-                This video has no review card — re-upload it to enable spaced repetition.
+                This video has no review card — re-upload it to enable spaced
+                repetition.
               </p>
             )}
             <Button variant="outline" asChild>
@@ -380,13 +393,22 @@ export default function PracticePage() {
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            This will permanently delete the video and all its practice tips and review history.
+            This will permanently delete the video and all its practice tips and
+            review history.
           </p>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleting}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
               {deleting ? "Deleting…" : "Delete"}
             </Button>
           </DialogFooter>
@@ -402,7 +424,7 @@ export default function PracticePage() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               variant="outline"
-              className="h-auto rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-muted-foreground gap-1"
+              className="h-auto gap-1 rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-muted-foreground"
             >
               <Upload className="size-3" />
               {formattedDate}
@@ -410,31 +432,37 @@ export default function PracticePage() {
             {videoData.danceStyle && (
               <Badge
                 variant="outline"
-                className="h-auto rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-primary/70 gap-1"
+                className="h-auto gap-1 rounded-md border-primary/20 px-2 py-0.5 text-xs font-normal text-primary/70"
               >
                 <Music2 className="size-3" />
                 {DANCE_STYLE_LABELS[videoData.danceStyle] ??
                   videoData.danceStyle}
               </Badge>
             )}
-            {videoData.card && (() => {
-              const today = new Date().toISOString().slice(0, 10)
-              const isDue = videoData.card!.dueDate <= today
-              const formatted = new Date(videoData.card!.dueDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
-              return (
-                <Badge
-                  variant="outline"
-                  className={
-                    isDue
-                      ? "h-auto rounded-md border-primary/40 px-2 py-0.5 text-xs font-normal text-primary gap-1"
-                      : "h-auto rounded-md border-border px-2 py-0.5 text-xs font-normal text-muted-foreground/60 gap-1"
-                  }
-                >
-                  <Clock className="size-3" />
-                  {formatted}
-                </Badge>
-              )
-            })()}
+            {videoData.card &&
+              (() => {
+                const today = new Date().toISOString().slice(0, 10)
+                const isDue = videoData.card!.dueDate <= today
+                const formatted = new Date(
+                  videoData.card!.dueDate + "T00:00:00"
+                ).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+                return (
+                  <Badge
+                    variant="outline"
+                    className={
+                      isDue
+                        ? "h-auto gap-1 rounded-md border-primary/40 px-2 py-0.5 text-xs font-normal text-primary"
+                        : "h-auto gap-1 rounded-md border-border px-2 py-0.5 text-xs font-normal text-muted-foreground/60"
+                    }
+                  >
+                    <Clock className="size-3" />
+                    {formatted}
+                  </Badge>
+                )
+              })()}
           </div>
         </section>
 
@@ -465,7 +493,9 @@ export default function PracticePage() {
                 <VideoPlayerPlayButton />
                 <VideoPlayerSeekBackwardButton seekOffset={10} />
                 <VideoPlayerSeekForwardButton seekOffset={10} />
-                <VideoPlayerPlaybackRateButton rates={[0.25, 0.5, 0.75, 1, 1.25]} />
+                <VideoPlayerPlaybackRateButton
+                  rates={[0.25, 0.5, 0.75, 1, 1.25]}
+                />
                 <VideoPlayerTimeRange />
                 <VideoPlayerTimeDisplay showDuration />
                 <VideoPlayerFullscreenButton />
@@ -502,14 +532,15 @@ export default function PracticePage() {
                 {videoData.practiceTips.length}
               </Badge>
             )}
-            {editingTips && draftTips.filter((t) => t.trim().length > 0).length > 0 && (
-              <Badge
-                variant="outline"
-                className="ml-1 border-primary/30 text-primary"
-              >
-                {draftTips.filter((t) => t.trim().length > 0).length}
-              </Badge>
-            )}
+            {editingTips &&
+              draftTips.filter((t) => t.trim().length > 0).length > 0 && (
+                <Badge
+                  variant="outline"
+                  className="ml-1 border-primary/30 text-primary"
+                >
+                  {draftTips.filter((t) => t.trim().length > 0).length}
+                </Badge>
+              )}
             <div className="ml-auto flex items-center gap-2">
               {editingTips ? (
                 <>
@@ -563,13 +594,15 @@ export default function PracticePage() {
                       }
                     }}
                     disabled={savingTips}
-                    className="flex-1 resize-none overflow-hidden rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                    className="flex-1 resize-none overflow-hidden rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none disabled:opacity-50"
                     rows={1}
                   />
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => setDraftTips(draftTips.filter((_, j) => j !== i))}
+                    onClick={() =>
+                      setDraftTips(draftTips.filter((_, j) => j !== i))
+                    }
                     disabled={savingTips}
                     className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
                   >
@@ -602,10 +635,6 @@ export default function PracticePage() {
                     className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5"
                     style={{ boxShadow: "0 2px 16px oklch(0 0 0 / 0.07)" }}
                   >
-                    <div
-                      className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accent}`}
-                      aria-hidden="true"
-                    />
                     <span className="mb-3 block font-heading text-[10px] font-bold tracking-widest text-muted-foreground/40 uppercase">
                       {String(i + 1).padStart(2, "0")}
                     </span>
@@ -618,7 +647,6 @@ export default function PracticePage() {
             </div>
           )}
         </section>
-
       </main>
 
       <HomeFooter />
