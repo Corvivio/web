@@ -1,9 +1,20 @@
 import { useClerk, useUser } from "@clerk/react-router"
 import { Link, useNavigate } from "react-router"
 import { useEffect, useState } from "react"
+import type { DateRange } from "react-day-picker"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
-import { Calendar, Clock, Music2, Play, Upload } from "lucide-react"
+import { Input } from "~/components/ui/input"
+import { Calendar as CalendarComponent } from "~/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select"
+import { Calendar, Clock, Music2, Play, Search, Upload, X } from "lucide-react"
 import HomeFooter from "~/components/home/HomeFooter"
 import UploadVideoDialog from "~/components/UploadVideoDialog"
 import { useApi } from "~/lib/api"
@@ -73,6 +84,17 @@ function formatDueDate(dueDate: string): string {
     month: "short",
     day: "numeric",
   })
+}
+
+function formatShortDate(dateStr: string): string {
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  })
+}
+
+function toDateString(d: Date): string {
+  return d.toISOString().slice(0, 10)
 }
 
 const MAX_VISIBLE = 6
@@ -193,6 +215,16 @@ export default function DashboardPage() {
   const [videosLoading, setVideosLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
   const [practiceLoading, setPracticeLoading] = useState(false)
+  const [searchInput, setSearchInput] = useState("")
+  const [filters, setFilters] = useState({
+    search: "",
+    danceStyle: "all",
+    dueFilter: "all",
+    dateFrom: "",
+    dateTo: "",
+  })
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   async function handleStartPractice() {
     if (practiceLoading) return
@@ -214,12 +246,30 @@ export default function DashboardPage() {
   }, [isLoaded, isSignedIn, navigate])
 
   useEffect(() => {
+    const t = setTimeout(() => {
+      setFilters((f) => ({ ...f, search: searchInput }))
+      setShowAll(false)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  useEffect(() => {
     if (!isSignedIn) return
-    api.get<ApiVideo[]>("/videos").then((res) => {
+    setVideosLoading(true)
+    setShowAll(false)
+    const params = new URLSearchParams()
+    if (filters.search) params.set("search", filters.search)
+    if (filters.danceStyle !== "all") params.set("danceStyle", filters.danceStyle)
+    if (filters.dateFrom) params.set("dateFrom", filters.dateFrom)
+    if (filters.dateTo) params.set("dateTo", filters.dateTo)
+    if (filters.dueFilter !== "all") params.set("dueFilter", filters.dueFilter)
+    const qs = params.toString()
+    api.get<ApiVideo[]>(`/videos${qs ? `?${qs}` : ""}`).then((res) => {
       if ("data" in res && res.data) setVideos(res.data)
+      else setVideos([])
       setVideosLoading(false)
     })
-  }, [isSignedIn])
+  }, [isSignedIn, filters])
 
   if (!isLoaded || !isSignedIn) {
     return (
@@ -236,6 +286,39 @@ export default function DashboardPage() {
   const hasMore = sessions.length > MAX_VISIBLE
   const dueCount = videos.filter((v) => v.dueDate != null && v.dueDate <= today).length
   const hasDue = dueCount > 0
+
+  const activeFilterCount = [
+    filters.search,
+    filters.danceStyle !== "all",
+    filters.dueFilter !== "all",
+    filters.dateFrom || filters.dateTo,
+  ].filter(Boolean).length
+
+  function clearFilters() {
+    setSearchInput("")
+    setFilters({ search: "", danceStyle: "all", dueFilter: "all", dateFrom: "", dateTo: "" })
+    setDateRange(undefined)
+    setShowAll(false)
+  }
+
+  function handleDateRangeSelect(range: DateRange | undefined) {
+    setDateRange(range)
+    setFilters((f) => ({
+      ...f,
+      dateFrom: range?.from ? toDateString(range.from) : "",
+      dateTo: range?.to ? toDateString(range.to) : "",
+    }))
+    setShowAll(false)
+    if (range?.from && range?.to) setDatePickerOpen(false)
+  }
+
+  function dateRangeLabel() {
+    if (filters.dateFrom && filters.dateTo)
+      return `${formatShortDate(filters.dateFrom)} – ${formatShortDate(filters.dateTo)}`
+    if (filters.dateFrom) return `From ${formatShortDate(filters.dateFrom)}`
+    if (filters.dateTo) return `Until ${formatShortDate(filters.dateTo)}`
+    return "Recording date"
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -394,6 +477,98 @@ export default function DashboardPage() {
             )}
           </div>
 
+          {/* Filter bar */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {/* Search */}
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Search videos..."
+                className="pl-8 h-9"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+            </div>
+
+            {/* Dance style */}
+            <Select
+              value={filters.danceStyle}
+              onValueChange={(v) => {
+                setFilters((f) => ({ ...f, danceStyle: v }))
+                setShowAll(false)
+              }}
+            >
+              <SelectTrigger className="h-9 gap-1.5 w-auto">
+                <Music2 className="size-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Dance style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All styles</SelectItem>
+                <SelectItem value="salsa_on1">Salsa On1</SelectItem>
+                <SelectItem value="salsa_on2">Salsa On2</SelectItem>
+                <SelectItem value="bachata">Bachata</SelectItem>
+                <SelectItem value="bachata_sensual">Bachata Sensual</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Due date */}
+            <Select
+              value={filters.dueFilter}
+              onValueChange={(v) => {
+                setFilters((f) => ({ ...f, dueFilter: v }))
+                setShowAll(false)
+              }}
+            >
+              <SelectTrigger className="h-9 gap-1.5 w-auto">
+                <Clock className="size-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Due date" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All due dates</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="due_today">Due today</SelectItem>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Date range */}
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={[
+                    "h-9 gap-1.5 font-normal",
+                    filters.dateFrom || filters.dateTo ? "text-foreground" : "text-muted-foreground",
+                  ].join(" ")}
+                >
+                  <Calendar className="size-4 shrink-0" />
+                  {dateRangeLabel()}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={(range) => handleDateRangeSelect(range as DateRange | undefined)}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+
+            {/* Clear */}
+            {activeFilterCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 gap-1.5 text-muted-foreground hover:text-foreground"
+                onClick={clearFilters}
+              >
+                <X className="size-4" />
+                Clear {activeFilterCount > 1 ? `${activeFilterCount} filters` : "filter"}
+              </Button>
+            )}
+          </div>
+
           {videosLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -430,10 +605,8 @@ export default function DashboardPage() {
         onOpenChange={setUploadOpen}
         onSuccess={() => {
           setUploadOpen(false)
-          // Re-fetch videos after a successful upload
-          api.get<ApiVideo[]>("/videos").then((res) => {
-            if ("data" in res && res.data) setVideos(res.data)
-          })
+          // Re-fetch by toggling a filter no-op — trigger the effect
+          setFilters((f) => ({ ...f }))
         }}
       />
     </div>

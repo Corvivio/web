@@ -5,6 +5,7 @@ import {
   MediaController,
   MediaFullscreenButton,
   MediaMuteButton,
+  MediaPlaybackRateButton,
   MediaPlayButton,
   MediaSeekBackwardButton,
   MediaSeekForwardButton,
@@ -12,6 +13,10 @@ import {
   MediaTimeRange,
   MediaVolumeRange,
 } from "media-chrome/react"
+import {
+  MediaPlaybackRateMenu,
+  MediaPlaybackRateMenuButton,
+} from "media-chrome/react/menu"
 import type { ComponentProps, CSSProperties } from "react"
 import { cn } from "~/lib/utils"
 
@@ -123,6 +128,43 @@ export const VideoPlayerFullscreenButton = ({
   ...props
 }: VideoPlayerFullscreenButtonProps) => (
   <MediaFullscreenButton className={cn("p-2.5", className)} {...props} />
+)
+
+export type VideoPlayerPlaybackRateButtonProps = ComponentProps<typeof MediaPlaybackRateButton>
+
+export const VideoPlayerPlaybackRateButton = ({
+  className,
+  style,
+  ...props
+}: VideoPlayerPlaybackRateButtonProps) => (
+  <MediaPlaybackRateButton
+    className={cn("p-2.5", className)}
+    style={{ "--media-text-color": "var(--primary)", ...style } as CSSProperties}
+    {...props}
+  />
+)
+
+export type VideoPlayerPlaybackRateMenuButtonProps = ComponentProps<typeof MediaPlaybackRateMenuButton>
+
+export const VideoPlayerPlaybackRateMenuButton = ({
+  className,
+  style,
+  ...props
+}: VideoPlayerPlaybackRateMenuButtonProps) => (
+  <MediaPlaybackRateMenuButton
+    className={cn("p-2.5", className)}
+    style={{ "--media-text-color": "var(--primary)", ...style } as CSSProperties}
+    {...props}
+  />
+)
+
+export type VideoPlayerPlaybackRateMenuProps = ComponentProps<typeof MediaPlaybackRateMenu>
+
+export const VideoPlayerPlaybackRateMenu = ({
+  className,
+  ...props
+}: VideoPlayerPlaybackRateMenuProps) => (
+  <MediaPlaybackRateMenu className={cn(className)} {...props} />
 )
 
 export type VideoPlayerContentProps = ComponentProps<"video">

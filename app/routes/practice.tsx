@@ -17,6 +17,7 @@ import {
   VideoPlayerContent,
   VideoPlayerControlBar,
   VideoPlayerFullscreenButton,
+  VideoPlayerPlaybackRateButton,
   VideoPlayerPlayButton,
   VideoPlayerSeekBackwardButton,
   VideoPlayerSeekForwardButton,
@@ -464,6 +465,7 @@ export default function PracticePage() {
                 <VideoPlayerPlayButton />
                 <VideoPlayerSeekBackwardButton seekOffset={10} />
                 <VideoPlayerSeekForwardButton seekOffset={10} />
+                <VideoPlayerPlaybackRateButton rates={[0.25, 0.5, 0.75, 1, 1.25]} />
                 <VideoPlayerTimeRange />
                 <VideoPlayerTimeDisplay showDuration />
                 <VideoPlayerFullscreenButton />
