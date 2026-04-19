@@ -217,10 +217,21 @@
     animation: shimmer-slide 0.55s ease-in-out forwards;
   }
 
+  /* Blob float — Hero decorative blobs */
+  @keyframes blob-float {
+    0%, 100% { transform: translate(0,0) rotate(0deg) scale(1); }
+    33%       { transform: translate(18px,-14px) rotate(4deg) scale(1.02); }
+    66%       { transform: translate(-10px,10px) rotate(-3deg) scale(0.98); }
+  }
+  .animate-blob-float  { animation: blob-float var(--blob-dur, 14s) ease-in-out infinite; }
+  .animate-blob-floatr { animation: blob-float var(--blob-dur, 14s) ease-in-out infinite reverse; }
+
   /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .animate-lantern-breathe,
     .animate-scroll-bob,
+    .animate-blob-float,
+    .animate-blob-floatr,
     .btn-shimmer::after { animation: none !important; }
   }
 }

@@ -326,8 +326,9 @@ export default function DashboardPage() {
       <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
         <Link
           to="/dashboard"
-          className="font-heading font-extrabold text-xl text-primary tracking-tight"
+          className="flex items-center gap-2 font-heading font-extrabold text-xl text-primary tracking-tight"
         >
+          <img src="/corvivio-icon.svg" alt="" aria-hidden="true" className="h-7 w-7" />
           corvivio
         </Link>
         <div className="flex items-center gap-3">

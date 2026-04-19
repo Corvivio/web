@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react"
-import { Brain, FileText, Video } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { useInView } from "~/hooks/useInView"
 import { cn } from "~/lib/utils"
 
@@ -10,9 +8,8 @@ function useCountUp(target: number, duration: number, active: boolean) {
     if (!active) return
     const start = performance.now()
     const tick = (now: number) => {
-      const elapsed = now - start
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 4) // ease-out-quart
+      const progress = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 4)
       setCount(Math.round(target * eased))
       if (progress < 1) requestAnimationFrame(tick)
     }
@@ -23,86 +20,83 @@ function useCountUp(target: number, duration: number, active: boolean) {
 
 const philosophyCards = [
   {
-    icon: <FileText className="size-7 text-primary" />,
     title: "No vocabulary required",
-    body: 'Say "that spinny thing with the arm." Corvivio takes how you describe it and turns it into a clean cue you\'ll actually recognize next time.',
+    body: 'Say "that spinny thing with the arm." Corvivio takes how you describe it and turns it into a cue you\'ll actually recognise next time.',
   },
   {
-    icon: <Video className="size-7 text-primary" />,
     title: "Your words, your memory",
     body: "Notes live alongside your video. Your language, your cues, your version of the pattern.",
   },
   {
-    icon: <Brain className="size-7 text-primary" />,
     title: "Built for how dancers learn",
-    body: "Spaced repetition surfaces each pattern right before it fades: so drilling feels effortless, not like catching up.",
+    body: "Spaced repetition surfaces each pattern right before it fades. So drilling feels effortless, not like catching up.",
   },
 ]
 
 export default function PhilosophySection() {
   const { ref: sectionRef, inView } = useInView<HTMLElement>({ threshold: 0.1 })
-  const count = useCountUp(80, 1200, inView)
+  const count = useCountUp(80, 1400, inView)
 
   return (
-    <section
-      ref={sectionRef}
-      className="mx-auto max-w-6xl px-4 py-12 md:py-16"
-    >
+    <section ref={sectionRef} className="mx-auto max-w-6xl px-6 py-28">
+      {/* Stat block */}
       <div
         className={cn(
-          "relative isolate mb-16 text-center",
-          inView
-            ? "animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both"
-            : "opacity-0",
+          "relative isolate mb-20 text-center transition-all duration-700",
+          inView ? "translate-y-0 opacity-100" : "translate-y-7 opacity-0"
         )}
       >
-        {/* Warm halo behind the stat */}
         <div
-          className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-[60%] rounded-full"
           style={{
             background:
-              "radial-gradient(circle, oklch(0.553 0.195 38.402 / 0.25) 0%, transparent 70%)",
+              "radial-gradient(circle, oklch(0.553 0.195 38.402 / 0.18) 0%, transparent 70%)",
           }}
-          aria-hidden="true"
         />
-        <p className="font-heading text-[4.5rem] leading-none font-black text-primary sm:text-[6rem] md:text-[10rem]">
+        <p
+          className="font-heading leading-none font-black text-primary"
+          style={{
+            fontSize: "clamp(5.5rem,20vw,12rem)",
+            letterSpacing: "-0.05em",
+          }}
+        >
           {count}%
         </p>
-        <p className="mt-3 font-heading text-xl font-semibold text-foreground md:text-2xl">
+        <p
+          className="mt-2 font-heading font-bold text-foreground"
+          style={{
+            fontSize: "clamp(1.1rem,2.5vw,1.6rem)",
+            letterSpacing: "-0.01em",
+          }}
+        >
           of what you learned won't survive the week.
         </p>
-        <div className="mx-auto mt-6 h-px w-16 bg-primary/30" />
-        <p className="mx-auto mt-6 max-w-lg leading-relaxed text-muted-foreground">
+        <div className="mx-auto mt-7 h-[3px] w-10 rounded-full bg-primary" />
+        <p className="mx-auto mt-7 max-w-[520px] leading-[1.75] text-muted-foreground">
           That cross-body with the copa finish. The footwork drill your
           instructor showed twice. It dissolves unless you revisit it,
           deliberately, at the right moment.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {philosophyCards.map(({ icon, title, body }, i) => (
+      {/* Cards */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        {philosophyCards.map(({ title, body }, i) => (
           <div
             key={title}
             className={cn(
-              inView
-                ? "animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                : "opacity-0",
+              "shadow-warm-sm relative overflow-hidden rounded-[2rem] border border-border/18 bg-card p-8 transition-all duration-700",
+              inView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
             )}
-            style={inView ? { animationDelay: `${i * 100}ms` } : undefined}
+            style={{ transitionDelay: inView ? `${350 + i * 100}ms` : "0ms" }}
           >
-            <Card className="h-full shadow-warm-sm hover:shadow-warm-md border-l-4 border-l-primary/70 transition-shadow duration-300">
-              <CardHeader className="gap-4">
-                <span>{icon}</span>
-                <CardTitle className="font-semibold text-foreground">
-                  {title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {body}
-                </p>
-              </CardContent>
-            </Card>
+            <h3 className="mb-[0.625rem] font-heading text-[1.1rem] font-extrabold tracking-[-0.01em] text-foreground">
+              {title}
+            </h3>
+            <p className="text-[0.9rem] leading-[1.7] text-muted-foreground">
+              {body}
+            </p>
           </div>
         ))}
       </div>

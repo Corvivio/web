@@ -1,38 +1,68 @@
-import type { ReactNode } from "react"
-import { Badge } from "~/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+function oc(l: number, c: number, h: number, a: number) {
+  return `oklch(${l} ${c} ${h} / ${a})`
+}
 
 export default function FeatureCard({
   badge,
-  icon,
   title,
   description,
-  detail,
+  chips,
+  accentL,
 }: {
   badge: string
-  icon: ReactNode
   title: string
   description: string
-  detail: string
+  chips: string[]
+  accentL: [number, number, number]
 }) {
+  const [l, c, h] = accentL
+
   return (
-    <Card className="h-full rounded-2xl pt-0 shadow-warm-sm hover:shadow-warm-md hover:bg-primary/[0.02] transition-all duration-300">
-      {/* Warm gradient top strip */}
-      <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary/70 to-primary/40" aria-hidden="true" />
-      <CardHeader className="pt-5">
-        <Badge
-          variant="outline"
-          className="w-fit border-primary/40 bg-primary/10 text-primary font-medium"
-        >
-          {icon}
-          {badge}
-        </Badge>
-        <CardTitle className="font-semibold text-lg">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-        <p className="text-xs text-muted-foreground/60 border-t border-border pt-3">{detail}</p>
-      </CardContent>
-    </Card>
+    <div
+      className="relative h-full overflow-hidden rounded-[2.5rem] border border-border/18 bg-card p-10 shadow-warm-sm transition-shadow duration-300 hover:shadow-warm-md"
+    >
+      {/* Top-right blob */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-12 -right-12"
+        style={{
+          width: 180,
+          height: 180,
+          borderRadius: "60% 40% 50% 50% / 40% 60% 40% 60%",
+          background: oc(l, c, h, 0.08),
+        }}
+      />
+
+      {/* Badge */}
+      <span
+        className="relative mb-6 inline-block rounded-full px-[0.875rem] py-[0.3rem] text-xs font-bold tracking-[0.02em]"
+        style={{
+          background: oc(l, c, h, 0.12),
+          color: oc(l, c, h, 1),
+          border: `1px solid ${oc(l, c, h, 0.22)}`,
+        }}
+      >
+        {badge}
+      </span>
+
+      <h3 className="relative mb-[0.875rem] font-heading text-[1.6rem] font-extrabold tracking-[-0.02em] text-foreground">
+        {title}
+      </h3>
+      <p className="relative mb-7 text-[0.95rem] leading-[1.7] text-muted-foreground">
+        {description}
+      </p>
+
+      {/* Chips */}
+      <div className="relative flex flex-wrap gap-[0.45rem]">
+        {chips.map((ch) => (
+          <span
+            key={ch}
+            className="rounded-full border border-border/25 bg-muted px-[0.875rem] py-[0.3rem] text-xs font-medium text-muted-foreground"
+          >
+            {ch}
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }

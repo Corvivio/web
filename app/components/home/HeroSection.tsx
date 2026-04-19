@@ -4,45 +4,153 @@ import { Button } from "~/components/ui/button"
 export default function HeroSection() {
   return (
     <section
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 pt-20 pb-16 text-center"
-      style={{
-        backgroundImage: `
-          radial-gradient(ellipse 120% 80% at 50% -15%,
-            oklch(0.553 0.195 38.402 / 0.40) 0%,
-            oklch(0.553 0.195 38.402 / 0.15) 45%,
-            transparent 72%),
-          radial-gradient(ellipse 60% 40% at 30% -5%,
-            oklch(0.553 0.195 38.402 / 0.25) 0%,
-            transparent 55%)
-        `,
-      }}
+      className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6 pt-32 pb-24 text-center"
+      style={{ background: "oklch(0.985 0.008 70)" }}
     >
-      <h1 className="max-w-4xl animate-in font-heading text-[2.75rem] leading-[1.05] font-extrabold tracking-tight text-foreground duration-700 fill-mode-both fade-in slide-in-from-bottom-6 sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl">
-        <span className="text-primary">Never forget</span> a combo again.
+      {/* Warm top glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-[8%] left-1/2 -translate-x-1/2"
+        style={{
+          width: 900,
+          height: 700,
+          background:
+            "radial-gradient(ellipse 80% 70% at 50% 20%, oklch(0.553 0.195 38.402 / 0.18) 0%, oklch(0.553 0.195 38.402 / 0.07) 45%, transparent 72%)",
+        }}
+      />
+
+      {/* Blob 1 — top-left */}
+      <div
+        aria-hidden="true"
+        className="animate-blob-float pointer-events-none absolute"
+        style={
+          {
+            "--blob-dur": "13s",
+            width: 380,
+            height: 380,
+            top: "-5%",
+            left: "-8%",
+            borderRadius: "71% 29% 66% 34% / 37% 51% 49% 63%",
+            background: "oklch(0.553 0.195 38.402 / 0.07)",
+          } as React.CSSProperties
+        }
+      />
+      {/* Blob 2 — bottom-right */}
+      <div
+        aria-hidden="true"
+        className="animate-blob-floatr pointer-events-none absolute"
+        style={
+          {
+            "--blob-dur": "17s",
+            width: 460,
+            height: 460,
+            bottom: "-5%",
+            right: "-10%",
+            borderRadius: "30% 70% 40% 60% / 50% 30% 70% 50%",
+            background: "oklch(0.455 0.138 82 / 0.08)",
+          } as React.CSSProperties
+        }
+      />
+      {/* Blob 3 — bottom-left */}
+      <div
+        aria-hidden="true"
+        className="animate-blob-float pointer-events-none absolute"
+        style={
+          {
+            "--blob-dur": "20s",
+            width: 200,
+            height: 200,
+            bottom: "18%",
+            left: "6%",
+            borderRadius: "71% 29% 66% 34% / 37% 51% 49% 63%",
+            background: "oklch(0.553 0.195 38.402 / 0.05)",
+          } as React.CSSProperties
+        }
+      />
+      {/* Blob 4 — top-right */}
+      <div
+        aria-hidden="true"
+        className="animate-blob-floatr pointer-events-none absolute"
+        style={
+          {
+            "--blob-dur": "16s",
+            width: 160,
+            height: 160,
+            top: "22%",
+            right: "8%",
+            borderRadius: "40% 60% 60% 40% / 60% 30% 70% 40%",
+            background: "oklch(0.455 0.138 82 / 0.06)",
+          } as React.CSSProperties
+        }
+      />
+
+      {/* Beta badge */}
+      <div
+        className="mb-8 inline-flex animate-in items-center gap-[0.45rem] rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wide text-primary duration-500 fill-mode-both fade-in slide-in-from-bottom-4"
+        style={{
+          background: "oklch(0.553 0.195 38.402 / 0.10)",
+          borderColor: "oklch(0.553 0.195 38.402 / 0.22)",
+          animationDelay: "50ms",
+        }}
+      >
+        <span
+          className="inline-block size-1.5 rounded-full bg-primary"
+          aria-hidden="true"
+        />
+        Free while in beta
+      </div>
+
+      {/* Headline */}
+      <h1
+        className="max-w-[900px] animate-in font-heading leading-[1.0] font-extrabold tracking-[-0.04em] text-foreground duration-[650ms] fill-mode-both fade-in slide-in-from-bottom-6"
+        style={{
+          fontSize: "clamp(3rem,9vw,7.5rem)",
+          animationDelay: "200ms",
+        }}
+      >
+        Dance more, <span className="text-primary">forget less.</span>
       </h1>
 
-      <p className="mt-6 max-w-xl animate-in text-lg leading-relaxed text-muted-foreground/90 duration-700 fill-mode-both [animation-delay:150ms] fade-in slide-in-from-bottom-4 md:text-xl">
-        Add your class videos. Corvivio brings them back right before they slip
-        away.
+      {/* Subline */}
+      <p
+        className="mt-6 max-w-[460px] animate-in leading-[1.7] text-muted-foreground duration-[650ms] fill-mode-both fade-in slide-in-from-bottom-4"
+        style={{
+          fontSize: "clamp(1rem,2vw,1.2rem)",
+          animationDelay: "380ms",
+        }}
+      >
+        Upload your class videos. Corvivio brings them back right before they
+        fade so you actually keep what you learn.
       </p>
 
-      <div className="mt-10 flex w-full max-w-xs animate-in flex-col items-stretch gap-3 duration-700 fill-mode-both [animation-delay:300ms] fade-in slide-in-from-bottom-4 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:gap-4">
-        <Button size="lg" asChild className="px-8 text-base">
-          <Link to="/signup">Join the Beta</Link>
+      {/* CTAs */}
+      <div
+        className="mt-10 flex animate-in flex-wrap justify-center gap-4 duration-[650ms] fill-mode-both fade-in slide-in-from-bottom-4"
+        style={{ animationDelay: "560ms" }}
+      >
+        <Button
+          size="lg"
+          asChild
+          className="shadow-warm-md rounded-full px-9 text-base font-bold"
+        >
+          <Link to="/signup">Join the Beta →</Link>
         </Button>
         <Button
           variant="outline"
           size="lg"
           asChild
-          className="border-foreground/30 px-8 text-base hover:bg-foreground/5"
+          className="rounded-full border-border/45 px-9 text-base font-semibold hover:border-primary/35 hover:text-foreground"
         >
-          <a href="#how-it-works">See how it works</a>
+          <a href="#how-it-works">How it works</a>
         </Button>
       </div>
 
-      <div className="animate-scroll-bob mt-16 flex flex-col items-center gap-2 text-foreground/40">
-        <span className="text-[10px] tracking-widest uppercase">Scroll</span>
-        <div className="h-6 w-px bg-foreground/30" />
+      {/* Scroll indicator */}
+      <div className="animate-scroll-bob absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-foreground/45">
+        <span className="text-[10px] font-semibold tracking-[0.15em] uppercase">
+          scroll
+        </span>
+        <div className="h-7 w-px bg-current opacity-50" />
       </div>
     </section>
   )

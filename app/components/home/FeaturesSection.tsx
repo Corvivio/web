@@ -1,88 +1,91 @@
-import { Video, Zap } from "lucide-react"
-import { Card, CardContent } from "~/components/ui/card"
+import { Wave } from "./Wave"
 import { useInView } from "~/hooks/useInView"
 import { cn } from "~/lib/utils"
 import FeatureCard from "./FeatureCard"
+
+const BG = "oklch(0.985 0.008 70)"
+const BG_WARM = "oklch(0.975 0.014 55)"
+
+const features = [
+  {
+    badge: "Video Log",
+    title: "Capture the moment",
+    description:
+      "Upload your end-of-class video. Corvivio suggests a title and surfaces key things to focus on. Then you accept, edit, or ignore.",
+    chips: [
+      "AI title suggestion",
+      "Personal notes",
+      "Structured practice tips",
+    ],
+    accentL: [0.553, 0.195, 38.402] as [number, number, number],
+  },
+  {
+    badge: "Practice Queue",
+    title: "SM-2 Spaced Repetition",
+    description:
+      "The same algorithm behind Anki, adapted for video review. Each video gets its own card, scheduled based on how well you recalled it.",
+    chips: [
+      "Per-video scheduling",
+      "Again / Got it / Easy",
+      "Adaptive intervals",
+    ],
+    accentL: [0.455, 0.138, 82] as [number, number, number],
+  },
+]
 
 export default function FeaturesSection() {
   const { ref: sectionRef, inView } = useInView<HTMLElement>({ threshold: 0.1 })
 
   return (
-    <section
-      id="features"
-      ref={sectionRef}
-      className="mx-auto max-w-6xl px-4 py-12 md:py-16"
-    >
-      <div
-        className={cn(
-          "mb-12 text-center",
-          inView
-            ? "animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both"
-            : "opacity-0",
-        )}
+    <div style={{ background: BG_WARM }}>
+      <Wave fill={BG} invert />
+      <section
+        id="features"
+        ref={sectionRef}
+        className="mx-auto max-w-6xl px-6 py-20"
       >
-        <h2 className="font-heading text-4xl font-bold text-foreground md:text-5xl">
-          What's in V0.1
-        </h2>
-        <p className="mt-3 text-muted-foreground">
-          Two focused tools. Nothing you don't need yet.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div
           className={cn(
-            "h-full",
-            inView
-              ? "animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-              : "opacity-0",
+            "mb-14 text-center transition-all duration-700",
+            inView ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
           )}
-          style={inView ? { animationDelay: "100ms" } : undefined}
         >
-          <FeatureCard
-            badge="Video Log"
-            icon={<Video className="size-5" />}
-            title="Capture the moment"
-            description="Upload your end-of-class video and write what you remember. Corvivio suggests a title and surfaces the key things to focus on — you accept, edit, or ignore."
-            detail="AI title suggestion · Personal notes · Structured practice tips"
-          />
-        </div>
-        <div
-          className={cn(
-            "h-full",
-            inView
-              ? "animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-              : "opacity-0",
-          )}
-          style={inView ? { animationDelay: "200ms" } : undefined}
-        >
-          <FeatureCard
-            badge="Practice Queue"
-            icon={<Zap className="size-5" />}
-            title="SM-2 Spaced Repetition"
-            description="The same algorithm behind Anki, adapted for video review. Each video gets its own card scheduled individually based on how well you recalled it."
-            detail="Per-video scheduling · again / got it / easy rating · Adaptive intervals"
-          />
-        </div>
-      </div>
-
-      <Card
-        className={cn(
-          "mt-6 bg-card/30 shadow-none ring-border/50 text-center",
-          inView
-            ? "animate-in fade-in duration-700 fill-mode-both"
-            : "opacity-0",
-        )}
-        style={inView ? { animationDelay: "300ms" } : undefined}
-      >
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Coming in V1:</span>{" "}
-            clip tagging, AI position extraction, move library, and a practice
-            queue that surfaces patterns by urgency.
+          <h2 className="font-heading text-4xl font-extrabold tracking-[-0.03em] text-foreground md:text-5xl">
+            What's in V0.1
+          </h2>
+          <p className="mt-[0.625rem] text-[1.05rem] text-muted-foreground">
+            Two focused tools. Nothing you don't need yet.
           </p>
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {features.map((feat, i) => (
+            <div
+              key={feat.title}
+              className={cn(
+                "h-full transition-all duration-700",
+                inView ? "translate-y-0 opacity-100" : "translate-y-7 opacity-0"
+              )}
+              style={{ transitionDelay: inView ? `${i * 150}ms` : "0ms" }}
+            >
+              <FeatureCard {...feat} />
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={cn(
+            "mt-6 rounded-[1.5rem] border border-dashed border-border/45 px-7 py-[1.125rem] text-center text-[0.875rem] text-muted-foreground transition-all duration-700",
+            inView ? "opacity-100" : "opacity-0"
+          )}
+          style={{ transitionDelay: inView ? "350ms" : "0ms" }}
+        >
+          <span className="font-semibold text-foreground">Coming in V1:</span>
+          {"  "}clip tagging · AI position extraction · move library ·
+          urgency-based queue
+        </div>
+      </section>
+      <Wave fill={BG} flip />
+    </div>
   )
 }
