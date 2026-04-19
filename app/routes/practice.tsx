@@ -329,7 +329,7 @@ export default function PracticePage() {
                     Again
                   </span>
                   <span className="text-xs leading-relaxed text-muted-foreground">
-                    Didn't get it — reset the interval and review soon.
+                    Didn't get it. Reset the interval and review soon.
                   </span>
                 </button>
 
@@ -346,7 +346,7 @@ export default function PracticePage() {
                     Got It
                   </span>
                   <span className="text-xs leading-relaxed text-white/70">
-                    Making progress — move the interval forward.
+                    Making progress! Move the interval forward.
                   </span>
                 </button>
 
@@ -367,13 +367,13 @@ export default function PracticePage() {
                     Easy
                   </span>
                   <span className="text-xs leading-relaxed text-muted-foreground">
-                    Nailed it — boost the interval significantly.
+                    Nailed it! Boost the interval significantly.
                   </span>
                 </button>
               </>
             ) : (
               <p className="text-sm text-muted-foreground">
-                This video has no review card — re-upload it to enable spaced
+                This video has no review card. Re-upload it to enable spaced
                 repetition.
               </p>
             )}
