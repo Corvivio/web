@@ -28,6 +28,7 @@ import {
   VideoPlayerContent,
   VideoPlayerControlBar,
   VideoPlayerFullscreenButton,
+  VideoPlayerMuteButton,
   VideoPlayerPlaybackRateButton,
   VideoPlayerPlayButton,
   VideoPlayerSeekBackwardButton,
@@ -498,6 +499,7 @@ export default function PracticePage() {
                 />
                 <VideoPlayerTimeRange />
                 <VideoPlayerTimeDisplay showDuration />
+                <VideoPlayerMuteButton />
                 <VideoPlayerFullscreenButton />
               </VideoPlayerControlBar>
             </VideoPlayer>

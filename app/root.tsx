@@ -37,7 +37,7 @@ export default function App() {
     console.log(
       "%c Corvivio",
       "font-size:18px; font-weight:800; color:#c2610a; font-family:Manrope,sans-serif;",
-      "\n\nBuilt for dancers who want to remember what they learned.\nWe track combos, not metrics.\n\nOpen to working together? → hello@corvivio.app",
+      "\n\nBuilt for dancers who want to remember what they learned.\nWe track combos, not metrics.\n\nOpen to working together? → pietro_agnoli@proton.me"
     )
   }, [])
 

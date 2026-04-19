@@ -13,6 +13,7 @@ import {
   VideoPlayerContent,
   VideoPlayerControlBar,
   VideoPlayerFullscreenButton,
+  VideoPlayerMuteButton,
   VideoPlayerPlayButton,
   VideoPlayerTimeRange,
 } from "../../components/kibo-ui/video-player"
@@ -253,6 +254,7 @@ export default function UploadVideoDialog({ open, onOpenChange, onSuccess }: Pro
                     />
                     <VideoPlayerControlBar>
                       <VideoPlayerPlayButton />
+                      <VideoPlayerMuteButton />
                       <VideoPlayerTimeRange />
                       <VideoPlayerFullscreenButton />
                     </VideoPlayerControlBar>
